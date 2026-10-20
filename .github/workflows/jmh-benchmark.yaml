@@ -1,0 +1,32 @@
+name: Run JMH Benchmark
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-jmh:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [ x86_64, arm64 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up architecture
+        run: sudo dpkg --add-architecture ${{ matrix.architecture }}
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Run JMH Benchmark
+        run: ./gradlew jmh
